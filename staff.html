@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>受付専用パネル — 45th Concert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet" />
+    <script src="jsQR.min.js"></script>
+    <style>
+        :root {
+            --gold: #c9a84c;
+            --bg-dark: #0a0a14;
+            --bg-card: #12121f;
+            --text-main: #f0eaff;
+            --text-sub: #a89ccc;
+            --success: #4dffb0;
+            --error: #ff6b6b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px 16px;
+            letter-spacing: 0.03em;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', 'Shippori Mincho', serif;
+            font-size: 1.4rem;
+            color: var(--gold);
+            letter-spacing: 0.1em;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b6914, #c9a84c);
+            color: #1a1000;
+        }
+
+        .btn-success {
+            background: rgba(77, 255, 176, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-sub);
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+
+        /* CAMERA */
+        .camera-area {
+            position: relative;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+            /* スマホで見やすい正方形 */
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        #cameraVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scan-frame {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 10%;
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
+        }
+
+        /* RESULT */
+        .result-card {
+            text-align: center;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .result-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .result-info {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 16px;
+        }
+
+        /* AUTH */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #staffContent {
+            display: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: #1a1a2e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: 1px solid var(--success);
+            font-size: 0.9rem;
+            display: none;
+            z-index: 2000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="authOverlay" class="auth-overlay">
+        <div style="width: 90%; max-width: 320px; text-align: center;">
+            <h2 style="margin-bottom: 20px; color: var(--gold);">Staff Login</h2>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="メールアドレス" required />
+                <input type="password" id="loginPassword" placeholder="パスワード" required />
+                <button type="submit" class="btn btn-primary" id="loginBtn">ログイン</button>
+            </form>
+            <p id="loginErr" style="color:var(--error); font-size:0.8rem; margin-top:12px; display:none;">ログイン失敗</p>
+        </div>
+    </div>
+
+    <div id="staffContent">
+        <div class="header">
+            <h1>🎼 受付専用パネル</h1>
+            <p style="font-size:0.8rem; color:var(--text-sub);">第45回定期演奏会</p>
+        </div>
+
+        <div class="card">
+            <div id="idleState">
+                <button class="btn btn-primary" onclick="window.startScan()">📸 スキャンを開始する</button>
+            </div>
+
+            <div class="camera-area" id="cameraArea">
+                <video id="cameraVideo" autoplay playsinline muted></video>
+                <div class="scan-frame"></div>
+                <canvas id="cameraCanvas" style="display:none;"></canvas>
+            </div>
+
+            <div class="result-card" id="resultCard">
+                <!-- ここに結果を表示 -->
+            </div>
+
+            <button class="btn btn-secondary" id="stopBtn" style="display:none;"
+                onclick="window.stopScan()">キャンセル</button>
+        </div>
+
+        <div class="card">
+            <h3 style="font-size:0.9rem; margin-bottom:12px;">📊 現在の来場状況</h3>
+            <div style="display:flex; justify-content:space-between; text-align:center;">
+                <div>
+                    <div id="statChecked" style="font-size:1.5rem; font-weight:700; color:var(--success);">0</div>
+                    <div style="font-size:0.7rem; color:var(--text-sub);">入場済み</div>
+                </div>
+                <div>
+                    <div id="statTotal" style="font-size:1.5rem; font-weight:700; color:var(--gold);">0</div>
+                    <div style="font-size:0.7rem; color:var(--text-sub);">総参加予定</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="window.signOut()">🚪 ログアウト</button>
+    </div>
+
+    <div id="toast" class="toast">✅ 入場を確定しました</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb5NiMP4iNy3Z3jPlu_je7J3P3WI83vGA",
+            authDomain: "th-concert-f910b.firebaseapp.com",
+            projectId: "th-concert-f910b",
+            storageBucket: "th-concert-f910b.firebasestorage.app",
+            messagingSenderId: "234883264488",
+            appId: "1:234883264488:web:871c2040e6bcd857debe5d",
+            measurementId: "G-X88QCT62JN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // --- Auth ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('authOverlay').style.display = 'none';
+                document.getElementById('staffContent').style.display = 'block';
+                initStats();
+            } else {
+                document.getElementById('authOverlay').style.display = 'flex';
+                document.getElementById('staffContent').style.display = 'none';
+            }
+        });
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true; btn.innerText = "ログイン中...";
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
+            } catch (err) {
+                document.getElementById('loginErr').style.display = 'block';
+                btn.disabled = false; btn.innerText = "ログイン";
+            }
+        };
+
+        window.signOut = () => { if (confirm('ログアウトしますか？')) firebaseSignOut(auth); };
+
+        // --- Stats ---
+        function initStats() {
+            onSnapshot(collection(db, "registrations"), (snapshot) => {
+                let checked = 0; let total = 0;
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.checkedIn) checked += (data.count || 1);
+                    total += (data.count || 1);
+                });
+                document.getElementById('statChecked').innerText = checked;
+                document.getElementById('statTotal').innerText = total;
+            });
+        }
+
+        // --- Camera & Scan ---
+        let stream = null;
+        window.startScan = async () => {
+            document.getElementById('idleState').style.display = 'none';
+            document.getElementById('cameraArea').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'inline-flex';
+            document.getElementById('resultCard').style.display = 'none';
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                document.getElementById('cameraVideo').srcObject = stream;
+                tick();
+            } catch (err) { alert("カメラが使えません"); window.stopScan(); }
+        };
+
+        window.stopScan = () => {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            stream = null;
+            document.getElementById('idleState').style.display = 'block';
+            document.getElementById('cameraArea').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'none';
+        };
+
+        function tick() {
+            const video = document.getElementById('cameraVideo');
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                const canvas = document.getElementById('cameraCanvas');
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
+                if (code) {
+                    let tid = code.data;
+                    if (tid.includes('tid=')) tid = new URL(tid).searchParams.get('tid');
+                    handleResult(tid);
+                    return;
+                }
+            }
+            if (stream) requestAnimationFrame(tick);
+        }
+
+        async function handleResult(tid) {
+            window.stopScan();
+            const resCard = document.getElementById('resultCard');
+            resCard.style.display = 'block';
+            resCard.innerHTML = "読み込み中...";
+
+            const docSnap = await getDoc(doc(db, "registrations", tid));
+            if (!docSnap.exists()) {
+                resCard.innerHTML = `<div style="color:var(--error); font-weight:700;">❌ 無効なチケット</div>
+                                     <button class="btn btn-secondary" onclick="window.startScan()">やり直す</button>`;
+                return;
+            }
+
+            const data = docSnap.data();
+            if (data.checkedIn) {
+                resCard.innerHTML = `<div class="result-name">${data.name} 様</div>
+                                     <div style="color:var(--error); font-weight:700; margin-bottom:12px;">⚠️ 既に入場済みです</div>
+                                     <button class="btn btn-secondary" onclick="window.startScan()">次へ</button>`;
+            } else {
+                resCard.innerHTML = `<div class="result-name">${data.name} 様</div>
+                                     <div class="result-info">${data.count}名</div>
+                                     <button class="btn btn-primary" id="confirmBtn">✅ 入場を確定する</button>
+                                     <button class="btn btn-secondary" onclick="window.startScan()">キャンセル</button>`;
+                document.getElementById('confirmBtn').onclick = async () => {
+                    await updateDoc(doc(db, "registrations", tid), { checkedIn: true, checkedInAt: new Date().toISOString() });
+                    document.getElementById('toast').style.display = 'block';
+                    setTimeout(() => document.getElementById('toast').style.display = 'none', 2000);
+                    window.startScan();
+                };
+            }
+        }
+    </script>
+</body>
+
+</html>

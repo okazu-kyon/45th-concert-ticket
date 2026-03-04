@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>コンサートチケット登録</title>
+    <meta name="description" content="定期演奏会チケット登録ページ。お名前・連絡先を入力してチケットを受け取ってください。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@700;800&family=Outfit:wght@700;800&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --gold: #dfc17b;
+            --gold-light: #fef1cf;
+            --gold-dark: #b88d3a;
+            --bg-dark: #050510;
+            --bg-card: rgba(30, 30, 50, 0.5);
+            /* Glassmorphism base */
+            --bg-input: rgba(255, 255, 255, 0.05);
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.65);
+            --accent: #9c7cf4;
+            --accent2: #5d42b3;
+            --error: #ff5f5f;
+            --success: #00f2fe;
+            --glass-border: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            letter-spacing: 0.03em;
+            position: relative;
+        }
+
+        /* Animated Aurora Background - Mega Trend */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 30% 30%, #1a1a3a 0%, transparent 40%),
+                radial-gradient(circle at 70% 20%, #2a1a4a 0%, transparent 40%),
+                radial-gradient(circle at 40% 80%, #1a3a5a 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #3a1a2a 0%, transparent 40%);
+            animation: auroraRoate 20s linear infinite;
+            z-index: -1;
+            filter: blur(100px);
+        }
+
+        @keyframes auroraRoate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, transparent 0%, var(--bg-dark) 90%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Music note particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0;
+            animation: floatNote linear infinite;
+            color: var(--gold);
+        }
+
+        @keyframes floatNote {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.3;
+            }
+
+            90% {
+                opacity: 0.2;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 480px;
+            padding: 24px 16px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            color: var(--gold-light);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(201, 168, 76, 0.3);
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            font-family: 'Outfit', 'Shippori Mincho', serif;
+            font-size: 2.1rem;
+            /* Slightly reduced for better balance */
+            background: linear-gradient(135deg, #fff, var(--gold-light), var(--gold), var(--gold-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            line-height: 1.35;
+            letter-spacing: 0.02em;
+            /* Tighter for better harmony with Kanji */
+            font-feature-settings: "palt" 1;
+            /* Optimize Japanese kerning */
+            font-weight: 800;
+        }
+
+        .header .subtitle {
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* Card - Glassmorphism Trend */
+        .card {
+            background: var(--bg-card);
+            border-radius: 28px;
+            padding: 36px 32px;
+            border: 1px solid var(--glass-border);
+            box-shadow:
+                0 20px 80px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            /* iOS support */
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(201, 168, 76, 0.4), transparent);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        label span.required {
+            color: var(--gold);
+            margin-left: 4px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.95rem;
+            padding: 13px 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(168, 156, 204, 0.4);
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+        }
+
+        input.error {
+            border-color: var(--error);
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 0.75rem;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        /* concert info box */
+        .info-box {
+            background: linear-gradient(135deg, rgba(124, 92, 191, 0.12), rgba(74, 48, 128, 0.12));
+            border: 1px solid rgba(124, 92, 191, 0.25);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .info-box .icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .info-box .info-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 4px;
+        }
+
+        .info-box .info-detail {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+            color: #1a1000;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-submit:hover::before {
+            left: 100%;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(201, 168, 76, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(26, 16, 0, 0.3);
+            border-top-color: #1a1000;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Success state */
+        .success-container {
+            display: none;
+            text-align: center;
+        }
+
+        .success-container.show {
+            display: block;
+        }
+
+        .form-container {
+            display: block;
+        }
+
+        .form-container.hide {
+            display: none;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            animation: bounceIn 0.6s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .success-sub {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* Ticket preview */
+        .ticket-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 8px 30px rgba(93, 66, 179, 0.4);
+        }
+
+        .ticket-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(93, 66, 179, 0.6);
+        }
+
+        /* Already registered */
+        .already-msg {
+            text-align: center;
+            padding: 20px;
+            background: rgba(201, 168, 76, 0.08);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .already-msg.show {
+            display: block;
+        }
+
+        .already-msg p {
+            font-size: 0.9rem;
+            color: var(--gold-light);
+            margin-bottom: 12px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: rgba(168, 156, 204, 0.4);
+        }
+
+        /* Duplicate modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px 28px;
+            max-width: 360px;
+            width: 90%;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            text-align: center;
+        }
+
+        .modal h2 {
+            font-size: 1.2rem;
+            color: var(--gold-light);
+            margin-bottom: 12px;
+        }
+
+        .modal p {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-modal-primary {
+            background: var(--gold);
+            color: #1a1000;
+        }
+
+        .btn-modal-primary:hover {
+            background: var(--gold-light);
+        }
+
+        .btn-modal-secondary {
+            background: var(--bg-input);
+            color: var(--text-sub);
+        }
+
+        .btn-modal-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="badge">🎵 Concert Ticket</div>
+            <h1>定期演奏会<br>チケット登録</h1>
+            <p class="subtitle">お名前と連絡先を入力して<br>チケットを受け取ってください</p>
+        </div>
+
+        <div class="card">
+
+            <!-- Concert Info Box (管理者側で設定された情報を表示) -->
+            <div class="info-box" id="concertInfoBox">
+                <div class="icon">🎼</div>
+                <div>
+                    <div class="info-title" id="concertName">第〇回 定期演奏会</div>
+                    <div class="info-detail" id="concertDetail">読み込み中...</div>
+                </div>
+            </div>
+
+            <!-- Already registered message -->
+            <div class="already-msg" id="alreadyMsg">
+                <p>このチケットは既に登録済みです</p>
+                <a id="alreadyTicketLink" href="ticket.html" class="ticket-btn" style="display:inline-flex;">
+                    🎫 チケットを見る
+                </a>
+            </div>
+
+            <!-- Form -->
+            <div class="form-container" id="formContainer">
+                <div class="section-title">参加者情報の入力</div>
+
+                <form id="registrationForm" novalidate>
+                    <div class="form-group">
+                        <label for="name">お名前<span class="required">*</span></label>
+                        <input type="text" id="name" placeholder="山田 花子" autocomplete="name" />
+                        <div class="error-msg" id="nameError">お名前を入力してください</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="furigana">ふりがな<span class="required">*</span></label>
+                        <input type="text" id="furigana" placeholder="やまだ はなこ" />
+                        <div class="error-msg" id="furiganaError">ふりがなを入力してください</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">メールアドレス<span class="required">*</span></label>
+                        <input type="email" id="email" placeholder="example@email.com" autocomplete="email" />
+                        <div class="error-msg" id="emailError">正しいメールアドレスを入力してください</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">電話番号（任意）</label>
+                        <input type="tel" id="phone" placeholder="090-1234-5678" autocomplete="tel" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="count">参加人数<span class="required">*</span></label>
+                        <select id="count">
+                            <option value="">選択してください</option>
+                            <option value="1">1名</option>
+                            <option value="2">2名</option>
+                            <option value="3">3名</option>
+                            <option value="4">4名</option>
+                        </select>
+                        <div class="error-msg" id="countError">参加人数を選択してください</div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        🎫 チケットを登録する
+                    </button>
+                </form>
+            </div>
+
+            <!-- Success State -->
+            <div class="success-container" id="successContainer">
+                <div class="success-icon">🎉</div>
+                <div class="success-title">登録完了！</div>
+                <p class="success-sub">チケットが発行されました。<br>当日はこのチケットのQRコードを提示してください。</p>
+                <a id="ticketLink" href="ticket.html" class="ticket-btn">
+                    🎫 チケットを確認する
+                </a>
+            </div>
+        </div>
+
+        <p class="footer">© 定期演奏会実行委員会</p>
+    </div>
+
+    <!-- Duplicate Modal -->
+    <div class="modal-overlay" id="duplicateModal">
+        <div class="modal">
+            <h2>⚠️ 既に登録済み</h2>
+            <p>このチケットIDは既に登録されています。<br>既存のチケットを表示しますか？</p>
+            <div class="modal-btns">
+                <button class="btn-modal btn-modal-secondary"
+                    onclick="document.getElementById('duplicateModal').classList.remove('show')">戻る</button>
+                <button class="btn-modal btn-modal-primary" id="modalTicketBtn">チケットを見る</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // ============================================================
+        // Firebase Configuration & Initialization
+        // ============================================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb5NiMP4iNy3Z3jPlu_je7J3P3WI83vGA",
+            authDomain: "th-concert-f910b.firebaseapp.com",
+            projectId: "th-concert-f910b",
+            storageBucket: "th-concert-f910b.firebasestorage.app",
+            messagingSenderId: "234883264488",
+            appId: "1:234883264488:web:871c2040e6bcd857debe5d",
+            measurementId: "G-X88QCT62JN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ============================================================
+        // Music note particles
+        // ============================================================
+        const notes = ['♩', '♪', '♫', '♬', '𝄞'];
+        const particleContainer = document.getElementById('particles');
+        for (let i = 0; i < 15; i++) {
+            const el = document.createElement('div');
+            el.className = 'particle';
+            el.textContent = notes[Math.floor(Math.random() * notes.length)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.animationDuration = (8 + Math.random() * 12) + 's';
+            el.style.animationDelay = (Math.random() * 10) + 's';
+            el.style.fontSize = (14 + Math.random() * 16) + 'px';
+            el.style.opacity = (0.1 + Math.random() * 0.25).toFixed(2);
+            particleContainer.appendChild(el);
+        }
+
+        // ============================================================
+        // Get ticket ID from URL params
+        // ============================================================
+        const params = new URLSearchParams(location.search);
+        const ticketId = params.get('tid');
+
+        // ============================================================
+        // Load concert info & Check registration from Firebase
+        // ============================================================
+        window.addEventListener('DOMContentLoaded', async () => {
+            // 1. Get concert settings
+            const settingsDoc = await getDoc(doc(db, "settings", "concert"));
+            const settings = settingsDoc.exists() ? settingsDoc.data() : {};
+
+            const nameEl = document.getElementById('concertName');
+            const detailEl = document.getElementById('concertDetail');
+
+            nameEl.textContent = settings.concertName || '第〇回 定期演奏会';
+
+            let details = [];
+            if (settings.concertDate) details.push('📅 ' + settings.concertDate);
+            if (settings.concertVenue) details.push('📍 ' + settings.concertVenue);
+            if (settings.concertTime) details.push('🕐 ' + settings.concertTime);
+            detailEl.textContent = details.length > 0 ? details.join('　') : '詳細は当日ご確認ください';
+
+            // 2. Check registration (Check URL first, then Local Storage)
+            const savedTid = localStorage.getItem('lastConcertTid');
+            const targetTid = ticketId || savedTid;
+
+            if (targetTid) {
+                const regDoc = await getDoc(doc(db, "registrations", targetTid));
+                if (regDoc.exists()) {
+                    const data = regDoc.data();
+                    if (params.get('mode') === 'edit') {
+                        // Edit mode: fill form
+                        document.getElementById('name').value = data.name || '';
+                        document.getElementById('furigana').value = data.furigana || '';
+                        document.getElementById('email').value = data.email || '';
+                        document.getElementById('phone').value = data.phone || '';
+                        document.getElementById('count').value = data.count || '';
+                        document.querySelector('.section-title').textContent = '登録内容の修正';
+                        document.getElementById('submitBtn').textContent = '✅ 内容を更新する';
+                    } else {
+                        // View mode (If saved tid is found and no tid in URL, auto-redirect)
+                        if (!ticketId) {
+                            location.href = `ticket.html?tid=${targetTid}`;
+                            return;
+                        }
+                        document.getElementById('alreadyMsg').classList.add('show');
+                        document.getElementById('formContainer').style.display = 'none';
+                        document.getElementById('alreadyTicketLink').href = `ticket.html?tid=${targetTid}`;
+                    }
+                }
+            }
+        });
+
+        // ============================================================
+        // Form Validation & Submission to Firebase
+        // ============================================================
+        function showError(id, show) {
+            const el = document.getElementById(id + 'Error');
+            const inp = document.getElementById(id);
+            if (el) el.classList.toggle('show', show);
+            if (inp) inp.classList.toggle('error', show);
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const furigana = document.getElementById('furigana').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const count = document.getElementById('count').value;
+
+            let valid = true;
+            showError('name', !name); if (!name) valid = false;
+            showError('furigana', !furigana); if (!furigana) valid = false;
+            const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            showError('email', !emailOk); if (!emailOk) valid = false;
+            showError('count', !count); if (!count) valid = false;
+
+            if (!valid) return;
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>登録中...';
+
+            try {
+                // Generate a random ID if tid is missing in URL
+                const tid = ticketId || ('TKT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase());
+
+                // Check for duplicates in real-time (Only if not in edit mode)
+                if (params.get('mode') !== 'edit') {
+                    const checkDoc = await getDoc(doc(db, "registrations", tid));
+                    if (checkDoc.exists()) {
+                        document.getElementById('duplicateModal').classList.add('show');
+                        document.getElementById('modalTicketBtn').onclick = () => {
+                            location.href = `ticket.html?tid=${tid}`;
+                        };
+                        btn.disabled = false;
+                        btn.innerHTML = '🎫 チケットを登録する';
+                        return;
+                    }
+                }
+
+                // Save or Update in Cloud Firestore
+                const regData = {
+                    tid: tid,
+                    name: name,
+                    furigana: furigana,
+                    email: email,
+                    phone: phone,
+                    count: parseInt(count),
+                    updatedAt: new Date().toISOString()
+                };
+
+                if (params.get('mode') !== 'edit') {
+                    regData.registeredAt = new Date().toISOString();
+                    regData.checkedIn = false;
+                    regData.checkedInAt = null;
+                }
+
+                await setDoc(doc(db, "registrations", tid), regData, { merge: true });
+
+                // Save to local storage so the user can find their ticket later without the URL
+                localStorage.setItem('lastConcertTid', tid);
+
+                // Show success
+                document.getElementById('formContainer').classList.add('hide');
+                document.getElementById('successContainer').classList.add('show');
+                document.getElementById('ticketLink').href = `ticket.html?tid=${tid}`;
+
+            } catch (error) {
+                console.error("Error saving to Firebase:", error);
+                alert("登録に失敗しました。インターネット接続を確認してください。");
+                btn.disabled = false;
+                btn.innerHTML = '🎫 チケットを登録する';
+            }
+        });
+    </script>
+</body>
+
+</html>
