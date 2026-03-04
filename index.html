@@ -295,7 +295,8 @@
             margin-bottom: 4px;
         }
 
-        < !-- GitHub送信の練習中 -->.info-box .info-detail {
+        /* GitHub送信の練習中 */
+        .info-box .info-detail {
             font-size: 0.8rem;
             color: var(--text-sub);
             line-height: 1.6;
@@ -550,6 +551,57 @@
 
         .btn-modal-secondary:hover {
             background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Mobile Optimization: Better readability & balance */
+        @media (max-width: 600px) {
+            .header .badge {
+                font-size: 13px;
+                padding: 8px 20px;
+            }
+
+            .header .subtitle {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 0.9rem;
+            }
+
+            label {
+                font-size: 1rem;
+            }
+
+            input,
+            select {
+                font-size: 1.1rem;
+                padding: 15px 18px;
+            }
+
+            .info-box .info-title {
+                font-size: 1.05rem;
+            }
+
+            .info-box .info-detail {
+                font-size: 0.95rem;
+            }
+
+            .success-title {
+                font-size: 1.6rem;
+            }
+
+            .success-sub {
+                font-size: 1.1rem;
+            }
+
+            .ticket-btn {
+                padding: 20px;
+                font-size: 1.1rem;
+            }
+
+            .footer {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>

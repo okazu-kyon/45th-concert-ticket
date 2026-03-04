@@ -191,6 +191,42 @@
             display: none;
             z-index: 2000;
         }
+
+        /* Mobile Optimization */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .result-name {
+                font-size: 1.7rem;
+            }
+
+            .result-info {
+                font-size: 1.1rem;
+            }
+
+            .btn {
+                font-size: 1.1rem;
+                padding: 18px;
+            }
+
+            #statChecked,
+            #statTotal {
+                font-size: 1.8rem;
+            }
+
+            #statChecked+div,
+            #statTotal+div {
+                font-size: 0.9rem;
+            }
+
+            .toast {
+                font-size: 1rem;
+                width: 90%;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
