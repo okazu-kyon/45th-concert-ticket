@@ -38,13 +38,18 @@
             padding: 0;
         }
 
+        html,
+        body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
         body {
             font-family: 'Zen Kaku Gothic New', sans-serif;
             background: var(--bg-dark);
             color: var(--text-main);
             min-height: 100vh;
             letter-spacing: 0.03em;
-            overflow-x: hidden;
             position: relative;
         }
 
@@ -747,6 +752,24 @@
             border-color: rgba(255, 107, 107, 0.3);
         }
 
+        /* FOOTER */
+        .footer {
+            margin-top: 60px;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            border-top: 1px solid var(--glass-border);
+            opacity: 0.7;
+        }
+
+        .footer .version {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+
         @media (max-width: 600px) {
             .topnav {
                 flex-direction: column;
@@ -1072,6 +1095,10 @@
                     <div class="scan-result-card" id="manualResultCard" style="margin-top:16px;"></div>
                 </div>
             </div>
+            <footer class="footer">
+                <p>© 定期演奏会実行委員会</p>
+                <span class="version">Version 1.0.2 (Local Test)</span>
+            </footer>
         </div> <!-- End of .main -->
 
     </div><!-- #adminContent -->

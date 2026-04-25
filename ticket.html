@@ -37,6 +37,12 @@
             padding: 0;
         }
 
+        html,
+        body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
         body {
             font-family: 'Zen Kaku Gothic New', sans-serif;
             background: var(--bg-dark);
@@ -49,7 +55,6 @@
             padding: 24px 16px 48px;
             letter-spacing: 0.03em;
             position: relative;
-            overflow-x: hidden;
         }
 
         /* Updated High-End Aurora - Brighter & More Dynamic */
@@ -620,14 +625,24 @@
             font-family: monospace;
         }
 
-        .ticket-footer {
-            padding: 16px 24px;
-            background: rgba(0, 0, 0, 0.2);
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        .footer {
+            margin-top: 48px;
+            padding-bottom: 24px;
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--text-sub);
-            line-height: 1.6;
+            opacity: 0.8;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 24px;
+            width: 100%;
+        }
+
+        .footer .version {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.7rem;
+            opacity: 0.6;
+            letter-spacing: 0.05em;
         }
 
         .actions {
@@ -716,6 +731,11 @@
         </div>
         <div id="ticketWrap"></div>
         <div class="actions" id="actionsWrap" style="display:none;"></div>
+        
+        <footer class="footer">
+            <p>© 定期演奏会実行委員会</p>
+            <span class="version">Version 1.0.2 (Local Test)</span>
+        </footer>
     </div>
 
     <script>
