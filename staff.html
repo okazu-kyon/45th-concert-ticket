@@ -8,18 +8,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@700;800&family=Outfit:wght@600;800&display=swap"
         rel="stylesheet" />
     <script src="jsQR.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
     <style>
         :root {
-            --gold: #c9a84c;
-            --bg-dark: #0a0a14;
-            --bg-card: #12121f;
-            --text-main: #f0eaff;
-            --text-sub: #a89ccc;
-            --success: #4dffb0;
-            --error: #ff6b6b;
+            --gold: #b88d3a;
+            --gold-light: #fdf5e6;
+            --gold-dark: #705621;
+            --bg-page: #f8f9fa;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-main: #1a1a1a;
+            --text-sub: #444444;
+            --success: #00b894;
+            --error: #d63031;
+            --glass-border: rgba(184, 141, 58, 0.2);
         }
 
         * {
@@ -28,40 +33,61 @@
             padding: 0;
         }
 
-        html,
-        body {
-            overflow-x: hidden;
-            width: 100%;
-        }
-
         body {
             font-family: 'Zen Kaku Gothic New', sans-serif;
-            background: var(--bg-dark);
+            background: var(--bg-page);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 20px 16px;
-            letter-spacing: 0.03em;
+            padding: 24px 16px;
+            letter-spacing: 0.02em;
+            position: relative;
+        }
+
+        /* Sync Aurora with index.html */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 30% 30%, #fdf5e6 0%, transparent 40%),
+                radial-gradient(circle at 70% 20%, #f0f4ff 0%, transparent 40%),
+                radial-gradient(circle at 40% 80%, #fff0f5 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #f5fffa 0%, transparent 40%);
+            animation: auroraRoate 30s linear infinite;
+            z-index: -1;
+            filter: blur(80px);
+        }
+
+        @keyframes auroraRoate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .header {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .header h1 {
-            font-family: 'Playfair Display', 'Shippori Mincho', serif;
-            font-size: 1.4rem;
-            color: var(--gold);
+            font-family: 'Shippori Mincho', serif;
+            font-size: 1.5rem;
+            color: var(--gold-dark);
             letter-spacing: 0.1em;
+            margin-bottom: 4px;
         }
 
         .card {
             background: var(--bg-card);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border-radius: 28px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .btn {
@@ -70,42 +96,49 @@
             justify-content: center;
             width: 100%;
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 16px;
             font-weight: 700;
             border: none;
             cursor: pointer;
             font-size: 1rem;
-            transition: 0.2s;
+            transition: 0.3s;
+            font-family: inherit;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #8b6914, #c9a84c);
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
             color: #1a1000;
+            box-shadow: 0 8px 20px rgba(184, 141, 58, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(184, 141, 58, 0.3);
         }
 
         .btn-success {
-            background: rgba(77, 255, 176, 0.2);
+            background: rgba(0, 184, 148, 0.1);
             color: var(--success);
-            border: 1px solid var(--success);
+            border: 1.5px solid var(--success);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.05);
             color: var(--text-sub);
-            margin-top: 10px;
-            font-size: 0.8rem;
+            margin-top: 12px;
+            font-size: 0.85rem;
         }
 
-        /* CAMERA */
+        /* CAMERA AREA */
         .camera-area {
             position: relative;
             background: #000;
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: hidden;
             aspect-ratio: 1/1;
-            /* スマホで見やすい正方形 */
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             display: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
         #cameraVideo {
@@ -116,156 +149,155 @@
 
         .scan-frame {
             position: absolute;
-            top: 10%;
-            left: 10%;
-            right: 10%;
-            bottom: 10%;
+            top: 15%; left: 15%; right: 15%; bottom: 15%;
             border: 2px solid var(--gold);
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
+        }
+
+        .scan-frame::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+            animation: scanLine 2s linear infinite;
+        }
+
+        @keyframes scanLine {
+            0%, 100% { top: 0; }
+            50% { top: 100%; }
         }
 
         /* RESULT */
         .result-card {
             text-align: center;
             display: none;
-            animation: slideIn 0.3s ease;
+            animation: fadeInUp 0.4s ease;
         }
 
-        @keyframes slideIn {
-            from {
-                transform: translateY(10px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .result-name {
-            font-size: 1.4rem;
-            font-weight: 700;
+            font-family: 'Shippori Mincho', serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
             margin-bottom: 8px;
         }
 
         .result-info {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: var(--text-sub);
-            margin-bottom: 16px;
+            margin-bottom: 24px;
         }
 
-        /* AUTH */
+        /* STATS */
+        .stat-grid {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            gap: 20px;
+        }
+
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+        }
+
+        /* AUTH OVERLAY */
         .auth-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg-dark);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(248, 249, 250, 0.6);
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        #staffContent {
-            display: none;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
         input {
             width: 100%;
-            padding: 14px;
-            margin-bottom: 12px;
-            background: #1a1a2e;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #fff;
+            padding: 16px;
+            margin-bottom: 16px;
+            background: #fff;
+            border: 1.5px solid rgba(0,0,0,0.08);
+            border-radius: 14px;
+            outline: none;
+            font-family: inherit;
         }
+
+        input:focus { border-color: var(--gold); }
 
         .toast {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
+            bottom: 32px; left: 50%;
             transform: translateX(-50%);
-            background: var(--bg-card);
-            padding: 12px 24px;
-            border-radius: 30px;
-            border: 1px solid var(--success);
-            font-size: 0.9rem;
+            background: #2d3436;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 40px;
+            font-weight: 700;
             display: none;
             z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        /* Mobile Optimization */
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 1.6rem;
-            }
-
-            .result-name {
-                font-size: 1.7rem;
-            }
-
-            .result-info {
-                font-size: 1.1rem;
-            }
-
-            .btn {
-                font-size: 1.1rem;
-                padding: 18px;
-            }
-
-            #statChecked,
-            #statTotal {
-                font-size: 1.8rem;
-            }
-
-            #statChecked+div,
-            #statTotal+div {
-                font-size: 0.9rem;
-            }
-
-            .toast {
-                font-size: 1rem;
-                width: 90%;
-                text-align: center;
-            }
-        }
-        /* FOOTER */
         .footer {
-            margin-top: 48px;
-            padding-bottom: 24px;
+            margin-top: 40px;
             text-align: center;
-            font-size: 0.8rem;
             color: var(--text-sub);
-            opacity: 0.7;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 24px;
-            width: 100%;
-        }
-
-        .footer .version {
-            display: block;
-            margin-top: 4px;
-            font-size: 0.7rem;
-            opacity: 0.5;
+            font-size: 0.8rem;
+            opacity: 0.6;
         }
     </style>
 </head>
 
 <body>
-
     <div id="authOverlay" class="auth-overlay">
-        <div style="width: 90%; max-width: 320px; text-align: center;">
-            <h2 style="margin-bottom: 20px; color: var(--gold);">Staff Login</h2>
+        <div class="card" style="width: 100%; max-width: 360px; text-align: center; border-radius: 24px; padding: 40px 24px; margin: 0 16px;">
+            <h2 style="font-family: 'Outfit', 'Shippori Mincho', serif; font-size: 2rem; margin-bottom: 24px; color: var(--gold-dark);">Staff Login</h2>
             <form id="loginForm">
-                <input type="email" id="loginEmail" placeholder="メールアドレス" required />
-                <input type="password" id="loginPassword" placeholder="パスワード" required />
-                <button type="submit" class="btn btn-primary" id="loginBtn">ログイン</button>
+                <input type="email" id="loginEmail" placeholder="メールアドレス" required style="font-size: 1.05rem;" />
+                <div style="position: relative; width: 100%; margin-bottom: 16px;">
+                    <input type="password" id="loginPassword" placeholder="パスワード" required style="font-size: 1.05rem; margin-bottom: 0; padding-right: 48px;" />
+                    <button type="button" onclick="togglePassword()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; padding: 4px; outline: none;">
+                        <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <script>
+                    function togglePassword() {
+                        const pwd = document.getElementById('loginPassword');
+                        const icon = document.getElementById('eyeIcon');
+                        if (pwd.type === 'password') {
+                            pwd.type = 'text';
+                            icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+                        } else {
+                            pwd.type = 'password';
+                            icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+                        }
+                    }
+                </script>
+                <button type="submit" class="btn btn-primary" id="loginBtn" style="font-size: 1.1rem; padding: 16px;">ログイン</button>
             </form>
-            <p id="loginErr" style="color:var(--error); font-size:0.8rem; margin-top:12px; display:none;">ログイン失敗</p>
+            <p id="loginErr" style="color:var(--error); font-size:0.85rem; margin-top:16px; display:none; font-weight:700;">ログイン失敗</p>
         </div>
     </div>
 
@@ -312,7 +344,7 @@
 
         <footer class="footer">
             <p>© 定期演奏会実行委員会</p>
-            <span class="version">Version 1.0.2 (Local Test)</span>
+            <span class="version">Version 1.0.3 (RSA Hybrid)</span>
         </footer>
     </div>
 
@@ -337,15 +369,62 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // ============================================================
+        // E2EE Decryption Setup (RSA Private Key)
+        // ============================================================
+        const RSA_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDJfMHZeNnsb19L
+pXqhb2eRBNHdXyblds3zHbbb3z4w5e6r7t8u9v0x1y2z3a4b5c6d7e8f9g0h1i2j
+3k4l5m6n7o8p9q0r1s2t3u4v5w6x7y8z9A0B1C2D3E4F5G6H7I8J9K0L1M2N3O4P
+5Q6R7S8T9U0V1W2X3Y4Z5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p1q2r3s4t5u6v
+7w8x9y0z1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z7a8b
+9c0d1e2f3g4h5i6j7k8l9m0n1o2p3q4r5s6t7u8v9w0x1y2z3A4B5C6D7E8F9G0H
+1I2J3K4L5M6N7O8P9Q0R1S2T3U4V5W6X7Y8Z9A0B1C2D3E4F5G6H7I8J9K0L1M2N
+3O4P5Q6R7S8T9U0V1W2X3Y4Z5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p1q2r3s4t
+5u6v7w8x9y0z1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z
+7a8b9c0d1e2f3g4h5i6j7k8l9m0n1o2p3q4r5s6t7u8v9w0x1y2z3A4B5C6D7E8F
+9G0H1I2J3K4L5M6N7O8P9Q0R1S2T3U4V5W6X7Y8Z9A0B1C2D3E4F5G6H7I8J9K0L
+-----END PRIVATE KEY-----`;
+
+        function decryptRSAHybrid(pData, pKey) {
+            try {
+                const decryptor = new JSEncrypt();
+                decryptor.setPrivateKey(RSA_PRIVATE_KEY);
+                const aesKey = decryptor.decrypt(pKey);
+                if (!aesKey) return null;
+                const bytes = CryptoJS.AES.decrypt(pData, aesKey);
+                const dec = bytes.toString(CryptoJS.enc.Utf8);
+                return dec ? JSON.parse(dec) : null;
+            } catch(e) { return null; }
+        }
+
+        function decryptWithAESKey(pData, aesKey) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(pData, aesKey);
+                const dec = bytes.toString(CryptoJS.enc.Utf8);
+                return dec ? JSON.parse(dec) : null;
+            } catch(e) { return null; }
+        }
+
+        const OLD_E2EE_KEY = "Concert45th_SecureKey_2026";
+        function decryptLegacy(ciphertext) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(ciphertext, OLD_E2EE_KEY);
+                return bytes.toString(CryptoJS.enc.Utf8);
+            } catch(e) { return ciphertext; }
+        }
+
         // --- Auth ---
         onAuthStateChanged(auth, (user) => {
+            const overlay = document.getElementById('authOverlay');
+            const content = document.getElementById('staffContent');
             if (user) {
-                document.getElementById('authOverlay').style.display = 'none';
-                document.getElementById('staffContent').style.display = 'block';
+                if (overlay) overlay.style.display = 'none';
+                if (content) content.style.display = 'block';
                 initStats();
             } else {
-                document.getElementById('authOverlay').style.display = 'flex';
-                document.getElementById('staffContent').style.display = 'none';
+                if (overlay) overlay.style.display = 'flex';
+                if (content) content.style.display = 'none';
             }
         });
 
@@ -385,11 +464,38 @@
             document.getElementById('stopBtn').style.display = 'inline-flex';
             document.getElementById('resultCard').style.display = 'none';
 
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("このブラウザはカメラに対応していないか、安全な接続（HTTPS）ではありません。");
+                window.stopScan();
+                return;
+            }
+
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                document.getElementById('cameraVideo').srcObject = stream;
+                // Try environment camera first, but fallback to any available camera
+                const constraints = { 
+                    video: { 
+                        facingMode: { ideal: "environment" } 
+                    } 
+                };
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('cameraVideo');
+                video.srcObject = stream;
+                await video.play().catch(e => console.warn("Auto-play failed:", e));
                 tick();
-            } catch (err) { alert("カメラが使えません"); window.stopScan(); }
+            } catch (err) { 
+                console.error("Camera Error:", err);
+                // Fallback to any camera if first attempt failed
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.getElementById('cameraVideo');
+                    video.srcObject = stream;
+                    await video.play().catch(e => console.warn("Auto-play failed:", e));
+                    tick();
+                } catch (err2) {
+                    alert("カメラを起動できませんでした。\n理由: " + (err2.message || err2.name || "不明なエラー")); 
+                    window.stopScan(); 
+                }
+            }
         };
 
         window.stopScan = () => {
@@ -410,17 +516,30 @@
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
                 if (code) {
-                    let tid = code.data;
-                    if (tid.includes('tid=')) tid = new URL(tid).searchParams.get('tid');
-                    handleResult(tid);
+                    processScan(code.data);
                     return;
                 }
             }
             if (stream) requestAnimationFrame(tick);
         }
 
-        async function handleResult(tid) {
+        async function processScan(code) {
             window.stopScan();
+            
+            // Try to extract AES key from URL if scanning full ticket URL
+            let scannedKey = null;
+            try {
+                if (code.includes('?')) {
+                    const params = new URLSearchParams(code.split('?')[1]);
+                    scannedKey = params.get('k');
+                }
+            } catch(e) {}
+
+            let tid = code;
+            if (tid.includes('tid=')) {
+                try { tid = new URL(tid).searchParams.get('tid'); } catch(e) {}
+            }
+
             const resCard = document.getElementById('resultCard');
             resCard.style.display = 'block';
             resCard.innerHTML = "読み込み中...";
@@ -433,12 +552,25 @@
             }
 
             const data = docSnap.data();
+            let displayName = "";
+
+            if (data.isRSA) {
+                let p = null;
+                if (scannedKey) p = decryptWithAESKey(data.pData, scannedKey);
+                if (!p) p = decryptRSAHybrid(data.pData, data.pKey);
+                displayName = p ? p.name : "(復号失敗)";
+            } else if (data.isEncrypted) {
+                displayName = decryptLegacy(data.name);
+            } else {
+                displayName = data.name;
+            }
+
             if (data.checkedIn) {
-                resCard.innerHTML = `<div class="result-name">${data.name} 様</div>
+                resCard.innerHTML = `<div class="result-name">${displayName} 様</div>
                                      <div style="color:var(--error); font-weight:700; margin-bottom:12px;">⚠️ 既に入場済みです</div>
                                      <button class="btn btn-secondary" onclick="window.startScan()">次へ</button>`;
             } else {
-                resCard.innerHTML = `<div class="result-name">${data.name} 様</div>
+                resCard.innerHTML = `<div class="result-name">${displayName} 様</div>
                                      <div class="result-info">${data.count}名</div>
                                      <button class="btn btn-primary" id="confirmBtn">✅ 入場を確定する</button>
                                      <button class="btn btn-secondary" onclick="window.startScan()">キャンセル</button>`;
@@ -451,6 +583,13 @@
             }
         }
     </script>
+    <!-- Development Navigation Menu -->
+    <div id="dev-nav" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); padding: 12px; border-radius: 12px; display: flex; gap: 12px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.3); font-family: sans-serif;">
+        <a href="index.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🏠</span><span>Home</span></a>
+        <a href="admin.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>⚙️</span><span>Admin</span></a>
+        <a href="staff.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🔍</span><span>Staff</span></a>
+        <a href="ticket.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🎫</span><span>Ticket</span></a>
+        <button onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; margin-left: 5px; opacity: 0.5;">×</button>
+    </div>
 </body>
-
 </html>

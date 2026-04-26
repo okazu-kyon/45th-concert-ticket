@@ -11,24 +11,24 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@700;800&family=Outfit:wght@700;800&display=swap"
         rel="stylesheet" />
-    <script src="./qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
     <style>
         :root {
-            --gold: #dfc17b;
-            --gold-light: #fef1cf;
-            --gold-dark: #b88d3a;
-            --bg-dark: #020205;
-            --bg-card: rgba(255, 255, 255, 0.03);
-            /* Extreme Glassmorphism */
-            --bg-input: rgba(0, 0, 0, 0.3);
-            --text-main: #ffffff;
-            --text-sub: rgba(255, 255, 255, 0.5);
-            --accent: #6366f1;
-            --accent2: #a855f7;
-            --error: #ff4d4d;
-            --success: #34d399;
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-reflection: rgba(255, 255, 255, 0.05);
+            --gold: #b88d3a;
+            --gold-light: #fdf5e6;
+            --gold-dark: #705621;
+            --bg-page: #f8f9fa;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --bg-input: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #444444;
+            --accent: #5d42b3;
+            --accent2: #a29bfe;
+            --error: #d63031;
+            --success: #00b894;
+            --glass-border: rgba(184, 141, 58, 0.2);
         }
 
         * {
@@ -37,27 +37,21 @@
             padding: 0;
         }
 
-        html,
-        body {
-            overflow-x: hidden;
-            width: 100%;
-        }
-
         body {
             font-family: 'Zen Kaku Gothic New', sans-serif;
-            background: var(--bg-dark);
+            background: var(--bg-page);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding: 24px 16px 48px;
-            letter-spacing: 0.03em;
+            padding: 32px 16px 60px;
+            letter-spacing: 0.02em;
             position: relative;
         }
 
-        /* Updated High-End Aurora - Brighter & More Dynamic */
+        /* Animated Aurora Background - Perfect Sync */
         body::before {
             content: '';
             position: fixed;
@@ -66,14 +60,13 @@
             width: 200%;
             height: 200%;
             background:
-                radial-gradient(circle at 15% 15%, #4338ca 0%, transparent 40%),
-                radial-gradient(circle at 85% 15%, #6d28d9 0%, transparent 40%),
-                radial-gradient(circle at 15% 85%, #1e40af 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, #a855f7 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, #020205 0%, transparent 100%);
-            animation: auroraRoate 20s linear infinite;
+                radial-gradient(circle at 30% 30%, #fdf5e6 0%, transparent 40%),
+                radial-gradient(circle at 70% 20%, #f0f4ff 0%, transparent 40%),
+                radial-gradient(circle at 40% 80%, #fff0f5 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #f5fffa 0%, transparent 40%);
+            animation: auroraRoate 30s linear infinite;
             z-index: -2;
-            filter: blur(70px);
+            filter: blur(80px);
         }
 
         /* Glass Texture Overlay */
@@ -91,44 +84,38 @@
         }
 
         @keyframes auroraRoate {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .container {
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 420px;
+            max-width: 480px;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 32px;
         }
 
         .header h1 {
             font-family: 'Outfit', 'Shippori Mincho', serif;
-            font-size: 2.1rem;
+            font-size: 2.2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #fff, var(--gold-light), var(--gold));
+            background: linear-gradient(135deg, var(--text-main), var(--gold-dark), var(--gold));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 6px;
-            letter-spacing: 0.02em;
-            font-feature-settings: "palt" 1;
-            filter: drop-shadow(0 0 10px rgba(223, 193, 123, 0.3));
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
         }
 
         .header p {
             color: var(--text-sub);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
         /* BENTO GRID LAYOUT - Improved 3-Column Balance */
@@ -145,12 +132,12 @@
 
         .tile {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(35px) saturate(180%);
-            -webkit-backdrop-filter: blur(35px) saturate(180%);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -263,9 +250,8 @@
         }
 
         .tile-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
             color: var(--text-sub);
             margin-bottom: 8px;
             font-weight: 700;
@@ -276,18 +262,18 @@
         }
 
         .tile-val {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             font-weight: 800;
-            color: #fff;
+            color: var(--text-main);
             line-height: 1.2;
             word-break: break-all;
             /* Prevent long names from breaking layout */
         }
 
         .tile-val-lg {
-            font-size: 1.4rem;
-            font-family: 'Outfit', 'Shippori Mincho', serif;
-            color: var(--gold-light);
+            font-size: 1.15rem;
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            color: var(--gold-dark);
             font-weight: 800;
             line-height: 1.4;
             letter-spacing: 0.02em;
@@ -318,9 +304,9 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.82rem;
-            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         .info-item .icon {
@@ -422,7 +408,7 @@
             }
 
             .tile-val-lg {
-                font-size: 1.6rem;
+                font-size: 1.2rem;
             }
 
             .info-item {
@@ -482,7 +468,7 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: var(--bg-dark);
+            background: var(--bg-page);
             border: 1px solid rgba(201, 168, 76, 0.1);
         }
 
@@ -620,7 +606,8 @@
         .tid-text {
             margin-top: 10px;
             font-size: 0.65rem;
-            color: rgba(168, 156, 204, 0.4);
+            color: var(--text-sub);
+            opacity: 0.6;
             letter-spacing: 0.1em;
             font-family: monospace;
         }
@@ -632,7 +619,7 @@
             font-size: 0.8rem;
             color: var(--text-sub);
             opacity: 0.8;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
             padding-top: 24px;
             width: 100%;
         }
@@ -726,7 +713,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎫 Your Ticket</h1>
+            <h1>Your Ticket</h1>
             <p>当日はこのQRコードを提示してください</p>
         </div>
         <div id="ticketWrap"></div>
@@ -734,7 +721,7 @@
         
         <footer class="footer">
             <p>© 定期演奏会実行委員会</p>
-            <span class="version">Version 1.0.2 (Local Test)</span>
+            <span class="version">Version 1.1.0 (Local Test)</span>
         </footer>
     </div>
 
@@ -806,6 +793,30 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // ============================================================
+        // E2EE Decryption Helper (Hybrid AES)
+        // ============================================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlKey = urlParams.get('k');
+
+        function decryptHybrid(ciphertext, aesKey) {
+            if (!ciphertext || !aesKey) return null;
+            try {
+                const bytes = CryptoJS.AES.decrypt(ciphertext, aesKey);
+                const decryptedStr = bytes.toString(CryptoJS.enc.Utf8);
+                if (!decryptedStr) return null;
+                return JSON.parse(decryptedStr);
+            } catch(e) { return null; }
+        }
+
+        const OLD_E2EE_KEY = "Concert45th_SecureKey_2026";
+        function decryptLegacy(ciphertext) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(ciphertext, OLD_E2EE_KEY);
+                return bytes.toString(CryptoJS.enc.Utf8);
+            } catch(e) { return ""; }
+        }
+
         function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
         function formatDate(iso) {
             if (!iso) return '—';
@@ -824,7 +835,6 @@
 
             if (!tid) { renderNotFound(wrap, 'チケットIDが見つかりません'); return; }
 
-            // Fetch from Firebase
             const regDoc = await getDoc(doc(db, "registrations", tid));
             const settingsDoc = await getDoc(doc(db, "settings", "concert"));
 
@@ -842,68 +852,69 @@
             const concertTime = s.concertTime || '—';
             const isIn = reg.checkedIn;
 
+            let name, furigana;
+            if (reg.isRSA) {
+                // Try key from URL first, then from localStorage
+                const effectiveKey = urlKey || localStorage.getItem(`key_${tid}`);
+                const p = decryptHybrid(reg.pData, effectiveKey);
+                if (p) {
+                    name = p.name;
+                    furigana = p.furigana;
+                } else {
+                    name = furigana = "暗号化されています";
+                }
+            } else if (reg.isEncrypted) {
+                name = decryptLegacy(reg.name);
+                furigana = decryptLegacy(reg.furigana);
+            } else {
+                name = reg.name;
+                furigana = reg.furigana;
+            }
+
             const statusHTML = isIn
-                ? '<span class="status-badge checked"><span class="dot"></span>入場済み</span>'
-                : '<span class="status-badge pending"><span class="dot"></span>未入場</span>';
+                ? '<div style="text-align:center; padding: 16px; background: rgba(0, 184, 148, 0.1); border: 2px solid var(--success); border-radius: 12px; color: var(--success); font-weight: 800; font-size: 1.1rem; width: 100%;">受付完了（ご来場ありがとうございます）</div>'
+                : '<div style="text-align:center; padding: 16px; background: rgba(201, 168, 76, 0.1); border: 2px dashed var(--gold); border-radius: 12px; color: var(--gold-dark); font-weight: 800; font-size: 1.1rem; width: 100%;">受付前（スタッフにこの画面をご提示ください）</div>';
 
             wrap.innerHTML = `
     <div class="bento-grid">
-      <!-- Row 1: Concert (Wide) -->
       <div class="tile tile-3 tile-concert">
-        <div style="display:flex; gap:16px; align-items: flex-start;">
-            <div style="opacity:0.6; padding-top:4px;">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor" style="color:var(--gold);">
-                    <path d="M12 32V8l20-4v24" stroke="currentColor" stroke-width="2" fill="none"/>
-                    <circle cx="9" cy="32" r="3" fill="currentColor"/>
-                    <circle cx="29" cy="28" r="3" fill="currentColor"/>
-                </svg>
-            </div>
             <div style="flex:1;">
-                <div class="tile-label">Exclusive Concert Invitation</div>
                 <div class="tile-val tile-val-lg" style="margin-bottom:12px;">${esc(concertName)}</div>
                 
                 <div class="concert-info-grid">
-                    <div class="info-item"><span class="icon">📅</span>${esc(concertDate)}</div>
-                    <div class="info-item"><span class="icon">🕐</span>${esc(concertTime)}</div>
-                    <div class="info-item" style="grid-column: span 2;"><span class="icon">📍</span>${esc(concertVenue)}</div>
+                    <div class="info-item">${esc(concertDate)}</div>
+                    <div class="info-item">${esc(concertTime)}</div>
+                    <div class="info-item" style="grid-column: span 2;">${esc(concertVenue)}</div>
                 </div>
             </div>
         </div>
       </div>
 
-      <!-- Row 2: Header (2/3) + Count (1/3) -->
-      <div class="tile tile-2">
-        <div class="tile-label">Ticket Holder / お名前</div>
-        <div class="tile-val">${esc(reg.name)}</div>
-        <div style="font-size:0.75rem; color:var(--text-sub); margin-top:4px; font-weight:400; font-feature-settings:'palt' 1;">${esc(reg.furigana || '')}</div>
-      </div>
-      <div class="tile tile-1" style="text-align:center; align-items:center;">
-        <div class="tile-label">Count</div>
-        <div class="tile-val" style="white-space:nowrap;">${reg.count} <span style="font-size:0.75rem; font-weight:400;">名</span></div>
-      </div>
-
-      <!-- Row 3: QR (Full) -->
-      <div class="tile tile-3" style="text-align:center; align-items:center; background: rgba(0,0,0,0.25);">
-        <div class="tile-label">Entrance QR Code</div>
-        <div class="qr-render-box" id="qrRenderBox" style="margin: 12px 0;">
-          <div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;">生成中...</div>
-        </div>
-        <div class="tid-text" style="font-size:0.65rem;">TICKET ID: ${esc(tid)}</div>
-      </div>
-
-      <!-- Row 4: Status (1/3) + Registered Date (2/3) -->
-      <div class="tile tile-1" style="align-items:center;">
-        <div class="tile-label">Status</div>
+      <div class="tile tile-3" style="padding: 0; background: transparent; border: none; box-shadow: none;">
         ${statusHTML}
       </div>
+
+      <div class="tile tile-3" style="text-align:center; align-items:center; background: rgba(0,0,0,0.02); padding-top: 24px; padding-bottom: 24px;">
+        <div class="tile-label" style="font-size: 1rem; color: var(--gold-dark);">入場用QRコード</div>
+        <div class="qr-render-box" id="qrRenderBox" style="margin: 16px 0;">
+          <div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;">生成中...</div>
+        </div>
+        <div class="tid-text" style="font-size:0.75rem;">チケットID: ${esc(tid)}</div>
+      </div>
+
       <div class="tile tile-2">
-        <div class="tile-label">Registration Snapshot</div>
-        <div style="font-size:0.8rem; color:#fff; font-weight:600;">${formatDate(reg.registeredAt)}</div>
+        <div class="tile-label">お名前</div>
+        <div class="tile-val">${esc(name)} 様</div>
+        <div style="font-size:0.85rem; color:var(--text-sub); margin-top:4px; font-weight:400; font-feature-settings:'palt' 1;">${esc(furigana || '')}</div>
+      </div>
+      <div class="tile tile-1" style="text-align:center; align-items:center;">
+        <div class="tile-label">人数</div>
+        <div class="tile-val" style="white-space:nowrap;">${reg.count} <span style="font-size:0.85rem; font-weight:400;">名</span></div>
       </div>
 
       <div class="tile tile-3" style="background:transparent; border:none; box-shadow:none; padding:10px; text-align:center; filter:none;">
-        <div style="font-size:0.7rem; color:var(--text-sub); line-height:1.6; opacity:0.8;">
-          ※入場時にスタッフへ提示してください。画像を保存しておくと安心です。
+        <div style="font-size:0.8rem; color:var(--text-sub); line-height:1.6; opacity:0.8;">
+          ※入場時にスタッフへこの画面を提示してください。<br>画面を明るくしておくとスムーズです。
         </div>
       </div>
     </div>`;
@@ -915,17 +926,17 @@
             if (svg) {
                 box.innerHTML = svg;
             } else {
-                box.innerHTML = '<div style="width:200px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:#666;text-align:center;padding:12px;"><div style="font-size:24px;margin-bottom:8px;">⚠️</div>QR生成に失敗<br><small style="margin-top:4px;">チケットIDをスタッフに見せてください</small></div>';
+                box.innerHTML = '<div style="width:200px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:#666;text-align:center;padding:12px;"><div style="font-size:24px;margin-bottom:8px;">!</div>QR生成に失敗<br><small style="margin-top:4px;">チケットIDをスタッフに見せてください</small></div>';
             }
 
             actWrap.style.display = 'flex';
             actWrap.innerHTML = `
-    <button class="btn btn-save" onclick="location.href='index.html?tid=${tid}&mode=edit'">✏️ 登録内容を修正する</button>
-    <button class="btn btn-share" onclick="window.print()">🖨️ 印刷 / PDF保存</button>`;
+    <button class="btn btn-save" onclick="location.href='index.html?tid=${tid}&mode=edit'">登録内容を修正する</button>
+    <button class="btn btn-share" onclick="window.print()">印刷 / PDF保存</button>`;
         });
 
         function renderNotFound(wrap, msg) {
-            wrap.innerHTML = `<div class="not-found"><div class="icon">❌</div><h2>チケットが見つかりません</h2><p>${msg}</p><a href="index.html" class="btn-back">← 登録ページへ戻る</a></div>`;
+            wrap.innerHTML = `<div class="not-found"><h2>チケットが見つかりません</h2><p>${msg}</p><a href="index.html" class="btn-back">← 登録ページへ戻る</a></div>`;
         }
 
         function saveTicket() {
@@ -941,6 +952,14 @@
             }
         }
     </script>
+    <!-- Development Navigation Menu -->
+    <div id="dev-nav" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); padding: 12px; border-radius: 12px; display: flex; gap: 12px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.3); font-family: sans-serif;">
+        <a href="index.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🏠</span><span>Home</span></a>
+        <a href="admin.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>⚙️</span><span>Admin</span></a>
+        <a href="staff.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🔍</span><span>Staff</span></a>
+        <a href="ticket.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🎫</span><span>Ticket</span></a>
+        <button onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; margin-left: 5px; opacity: 0.5;">×</button>
+    </div>
 </body>
 
 </html>

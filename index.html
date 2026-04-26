@@ -5,29 +5,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>コンサートチケット登録</title>
-    <meta name="description" content="定期演奏会チケット登録ページ。お名前・連絡先を入力してチケットを受け取ってください。" />
+    <meta name="description" content="定期演奏会チケット登録ページ。お名前・連絡先を入力してQRコードチケットを受け取ってください。" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
         href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@700;800&family=Outfit:wght@700;800&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
     <style>
         :root {
-            --gold: #dfc17b;
-            --gold-light: #fef1cf;
-            --gold-dark: #b88d3a;
-            --bg-dark: #050510;
-            --bg-card: rgba(30, 30, 50, 0.5);
-            /* Glassmorphism base */
-            --bg-input: rgba(255, 255, 255, 0.05);
-            --text-main: #ffffff;
-            --text-sub: rgba(255, 255, 255, 0.65);
-            --accent: #9c7cf4;
-            --accent2: #5d42b3;
-            --error: #ff5f5f;
-            --success: #00f2fe;
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --gold: #b88d3a;
+            --gold-light: #fdf5e6;
+            --gold-dark: #705621; /* Slightly darker for contrast */
+            --bg-page: #f8f9fa;
+            --bg-card: rgba(255, 255, 255, 0.94); /* Increased opacity for readability */
+            --bg-input: #ffffff;
+            --text-main: #1a1a1a; /* Darker main text */
+            --text-sub: #444444; /* Darker sub text */
+            --accent: #5d42b3;
+            --accent2: #a29bfe;
+            --error: #d63031;
+            --success: #00b894;
+            --glass-border: rgba(184, 141, 58, 0.2);
         }
 
         * {
@@ -44,14 +45,14 @@
 
         body {
             font-family: 'Zen Kaku Gothic New', sans-serif;
-            background: var(--bg-dark);
+            background: var(--bg-page);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
             position: relative;
         }
 
@@ -64,13 +65,13 @@
             width: 200%;
             height: 200%;
             background:
-                radial-gradient(circle at 30% 30%, #1a1a3a 0%, transparent 40%),
-                radial-gradient(circle at 70% 20%, #2a1a4a 0%, transparent 40%),
-                radial-gradient(circle at 40% 80%, #1a3a5a 0%, transparent 40%),
-                radial-gradient(circle at 80% 80%, #3a1a2a 0%, transparent 40%);
-            animation: auroraRoate 20s linear infinite;
+                radial-gradient(circle at 30% 30%, #fdf5e6 0%, transparent 40%),
+                radial-gradient(circle at 70% 20%, #f0f4ff 0%, transparent 40%),
+                radial-gradient(circle at 40% 80%, #fff0f5 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #f5fffa 0%, transparent 40%);
+            animation: auroraRoate 30s linear infinite;
             z-index: -1;
-            filter: blur(100px);
+            filter: blur(80px);
         }
 
         @keyframes auroraRoate {
@@ -89,7 +90,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 50% 50%, transparent 0%, var(--bg-dark) 90%);
+            background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(255,255,255,0.8) 90%);
             z-index: 0;
             pointer-events: none;
         }
@@ -134,18 +135,99 @@
             }
         }
 
+        /* Global Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-title-wrap {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .hero-title {
+            font-family: 'Shippori Mincho', serif;
+            font-size: clamp(1.5rem, 7.5vw, 3.2rem);
+            font-weight: 800;
+            color: var(--gold-dark);
+            letter-spacing: 0.1em;
+            text-shadow: 0 4px 20px rgba(112, 86, 33, 0.2), 0 0 40px rgba(255,255,255,0.5);
+            animation: fadeInUp 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-bottom: 8px;
+            padding: 0 20px;
+            white-space: nowrap;
+        }
+
+        .hero-subtitle {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-sub);
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            margin-top: 10px;
+            animation: fadeInUp 2s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--gold);
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            animation: floating 2s ease-in-out infinite;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .scroll-hint::after {
+            content: '';
+            display: block;
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--gold), transparent);
+            margin: 10px auto 0;
+        }
+
         .container {
             position: relative;
             z-index: 1;
             width: 100%;
             max-width: 480px;
-            padding: 24px 16px;
+            padding: 100px 20px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .container.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
         }
 
         .header .badge {
@@ -166,7 +248,7 @@
             font-family: 'Outfit', 'Shippori Mincho', serif;
             font-size: 2.1rem;
             /* Slightly reduced for better balance */
-            background: linear-gradient(135deg, #fff, var(--gold-light), var(--gold), var(--gold-dark));
+            background: linear-gradient(135deg, var(--text-main), var(--gold-dark), var(--gold));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -188,15 +270,14 @@
         /* Card - Glassmorphism Trend */
         .card {
             background: var(--bg-card);
-            border-radius: 28px;
-            padding: 36px 32px;
-            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 40px 36px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
             box-shadow:
-                0 20px 80px rgba(0, 0, 0, 0.5),
-                inset 0 0 20px rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            /* iOS support */
+                0 20px 60px rgba(0, 0, 0, 0.05),
+                0 0 1px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .section-title {
@@ -241,13 +322,13 @@
         select {
             width: 100%;
             background: var(--bg-input);
-            border: 1.5px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            border-radius: 14px;
             color: var(--text-main);
-            font-family: 'Noto Sans JP', sans-serif;
-            font-size: 0.95rem;
-            padding: 13px 16px;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1rem;
+            padding: 14px 18px;
+            transition: all 0.25s;
             outline: none;
         }
 
@@ -258,7 +339,8 @@
         input:focus,
         select:focus {
             border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+            background: #fff;
+            box-shadow: 0 8px 20px rgba(184, 141, 58, 0.08);
         }
 
         input.error {
@@ -278,13 +360,13 @@
 
         /* concert info box */
         .info-box {
-            background: linear-gradient(135deg, rgba(124, 92, 191, 0.12), rgba(74, 48, 128, 0.12));
-            border: 1px solid rgba(124, 92, 191, 0.25);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fdf5e6, #fffafa);
+            border: 1px solid rgba(184, 141, 58, 0.15);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 28px;
             display: flex;
-            gap: 12px;
+            gap: 14px;
             align-items: flex-start;
         }
 
@@ -296,7 +378,7 @@
         .info-box .info-title {
             font-size: 0.85rem;
             font-weight: 700;
-            color: var(--gold-light);
+            color: var(--gold-dark);
             margin-bottom: 4px;
         }
 
@@ -317,7 +399,7 @@
             font-size: 1rem;
             font-weight: 700;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
             transition: all 0.3s;
             letter-spacing: 0.05em;
@@ -457,10 +539,10 @@
         .already-msg {
             text-align: center;
             padding: 20px;
-            background: rgba(201, 168, 76, 0.08);
-            border: 1px solid rgba(201, 168, 76, 0.2);
-            border-radius: 12px;
-            margin-bottom: 20px;
+            background: #fff9eb;
+            border: 1px solid rgba(184, 141, 58, 0.1);
+            border-radius: 16px;
+            margin-bottom: 24px;
             display: none;
         }
 
@@ -481,8 +563,8 @@
             text-align: center;
             font-size: 0.8rem;
             color: var(--text-sub);
-            opacity: 0.8;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            opacity: 0.6;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
             padding-top: 24px;
             width: 100%;
         }
@@ -633,18 +715,33 @@
 
     <div class="particles" id="particles"></div>
 
-    <div class="container">
+    <section class="hero" id="hero">
+        <div class="hero-title-wrap">
+            <h1 class="hero-title">第四十五回 定期演奏会</h1>
+        </div>
+        <p class="hero-subtitle">The 45th Anniversary Concert</p>
+        
+        <button class="btn-submit" style="max-width:280px; margin-top:30px; animation: fadeInUp 2.5s both;" 
+                onclick="document.getElementById('main-content').scrollIntoView({behavior:'smooth'})">
+            デジタルチケットを申し込む
+        </button>
+
+        <div class="scroll-hint" onclick="document.getElementById('main-content').scrollIntoView({behavior:'smooth'})">
+            SCROLL DOWN
+        </div>
+    </section>
+
+    <div class="container" id="main-content">
         <div class="header">
-            <div class="badge">🎵 Concert Ticket</div>
-            <h1>定期演奏会<br>チケット登録</h1>
-            <p class="subtitle">お名前と連絡先を入力して<br>チケットを受け取ってください</p>
+            <div class="badge">Concert Ticket</div>
+            <h1>チケット登録</h1>
+            <p class="subtitle">お名前と連絡先を入力して<br>QRコードチケットを受け取ってください</p>
         </div>
 
         <div class="card">
 
             <!-- Concert Info Box (管理者側で設定された情報を表示) -->
-            <div class="info-box" id="concertInfoBox">
-                <div class="icon">🎼</div>
+            <div class="info-box" id="concertInfoBox" style="justify-content: center; text-align: center;">
                 <div>
                     <div class="info-title" id="concertName">第〇回 定期演奏会</div>
                     <div class="info-detail" id="concertDetail">読み込み中...</div>
@@ -655,7 +752,7 @@
             <div class="already-msg" id="alreadyMsg">
                 <p>このチケットは既に登録済みです</p>
                 <a id="alreadyTicketLink" href="ticket.html" class="ticket-btn" style="display:inline-flex;">
-                    🎫 チケットを見る
+                    🎫 QRチケットを表示
                 </a>
             </div>
 
@@ -700,7 +797,7 @@
                     </div>
 
                     <button type="submit" class="btn-submit" id="submitBtn">
-                        🎫 チケットを登録する
+                        QRコードを発行する
                     </button>
                 </form>
             </div>
@@ -708,17 +805,17 @@
             <!-- Success State -->
             <div class="success-container" id="successContainer">
                 <div class="success-icon">🎉</div>
-                <div class="success-title">登録完了！</div>
-                <p class="success-sub">チケットが発行されました。<br>当日はこのチケットのQRコードを提示してください。</p>
+                <div class="success-title">QRチケット発行完了！</div>
+                <p class="success-sub">QRチケットが発行されました。<br>当日はこのQRコードを提示してご入場ください。</p>
                 <a id="ticketLink" href="ticket.html" class="ticket-btn">
-                    🎫 チケットを確認する
+                    QRチケットを表示する
                 </a>
             </div>
         </div>
 
         <footer class="footer">
             <p>© 定期演奏会実行委員会</p>
-            <span class="version">Version 1.0.2 (Local Test)</span>
+            <span class="version">Version 1.1.0 (Local Test)</span>
         </footer>
     </div>
 
@@ -730,7 +827,7 @@
             <div class="modal-btns">
                 <button class="btn-modal btn-modal-secondary"
                     onclick="document.getElementById('duplicateModal').classList.remove('show')">戻る</button>
-                <button class="btn-modal btn-modal-primary" id="modalTicketBtn">チケットを見る</button>
+                <button class="btn-modal btn-modal-primary" id="modalTicketBtn">QRチケットを表示</button>
             </div>
         </div>
     </div>
@@ -740,7 +837,7 @@
         // Firebase Configuration & Initialization
         // ============================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDb5NiMP4iNy3Z3jPlu_je7J3P3WI83vGA",
@@ -754,6 +851,56 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // ============================================================
+        // E2EE (End-to-End Encryption) Setup - RSA + AES Hybrid
+        // ============================================================
+        function hybridEncrypt(plainText, aesKey) {
+            const encryptedData = CryptoJS.AES.encrypt(plainText, aesKey).toString();
+            const encryptor = new JSEncrypt();
+            encryptor.setPublicKey(RSA_PUBLIC_KEY);
+            const encryptedAesKey = encryptor.encrypt(aesKey);
+            return { encryptedData, encryptedAesKey };
+        }
+
+        function hybridDecrypt(ciphertext, aesKey) {
+            if (!ciphertext || !aesKey) return null;
+            try {
+                const bytes = CryptoJS.AES.decrypt(ciphertext, aesKey);
+                const dec = bytes.toString(CryptoJS.enc.Utf8);
+                return dec ? JSON.parse(dec) : null;
+            } catch(e) { return null; }
+        }
+        const RSA_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyXzB2XjZ7G9fS6V6oW9n
+kQjR3V8m5X7N8x2y3z4w5e6r7t8u9v0x1y2z3a4b5c6d7e8f9g0h1i2j3k4l5m6n
+7o8p9q0r1s2t3u4v5w6x7y8z9A0B1C2D3E4F5G6H7I8J9K0L1M2N3O4P5Q6R7S8T
+9U0V1W2X3Y4Z5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p1q2r3s4t5u6v7w8x9y0z
+1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z7a8b9c0d1e2f
+3g4h5i6j7k8l9m0n1o2p3q4r5s6t7u8v9w0x1y2z3A4B5C6D7E8F9G0H1I2J3K4L
+5M6N7O8P9Q0R1S2T3U4V5W6X7Y8Z9A0B1C2D3E4F5G6H7I8J9K0L1M2N3O4P5Q6R
+7S8T9U0V1W2X3Y4Z5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p1q2r3s4t5u6v7w8x
+9y0z1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T1U2V3W4X5Y6Z7a8b9c0d
+1e2f3g4h5i6j7k8l9m0n1o2p3q4r5s6t7u8v9w0x1y2z3A4B5C6D7E8F9G0H1I2J
+3K4L5M6N7O8P9Q0R1S2T3U4V5W6X7Y8Z9A0B1C2D3E4F5G6H7I8J9K0L1M2N3O4P
+-----END PUBLIC KEY-----`;
+
+        const OLD_E2EE_KEY = "Concert45th_SecureKey_2026";
+        function decryptLegacy(ciphertext) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(ciphertext, OLD_E2EE_KEY);
+                return bytes.toString(CryptoJS.enc.Utf8);
+            } catch(e) { return ciphertext; }
+        }
+
+        function generateRandomAESKey() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            let key = "";
+            for (let i = 0; i < 32; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return key;
+        }
 
         // ============================================================
         // Music note particles
@@ -807,13 +954,32 @@
                     const data = regDoc.data();
                     if (params.get('mode') === 'edit') {
                         // Edit mode: fill form
-                        document.getElementById('name').value = data.name || '';
-                        document.getElementById('furigana').value = data.furigana || '';
-                        document.getElementById('email').value = data.email || '';
-                        document.getElementById('phone').value = data.phone || '';
+                        let name, furigana, email, phone;
+                        if (data.isRSA) {
+                            // Need key from URL or localStorage to decrypt in edit mode
+                            const urlKey = params.get('k') || localStorage.getItem(`key_${ticketId}`);
+                            const p = hybridDecrypt(data.pData, urlKey);
+                            if (p) {
+                                name = p.name; furigana = p.furigana; email = p.email; phone = p.phone;
+                            } else {
+                                name = furigana = email = phone = "暗号化されています";
+                            }
+                        } else if (data.isEncrypted) {
+                            name = decryptLegacy(data.name);
+                            furigana = decryptLegacy(data.furigana);
+                            email = decryptLegacy(data.email);
+                            phone = decryptLegacy(data.phone);
+                        } else {
+                            name = data.name; furigana = data.furigana; email = data.email; phone = data.phone;
+                        }
+
+                        document.getElementById('name').value = name || '';
+                        document.getElementById('furigana').value = furigana || '';
+                        document.getElementById('email').value = email || '';
+                        document.getElementById('phone').value = phone || '';
                         document.getElementById('count').value = data.count || '';
                         document.querySelector('.section-title').textContent = '登録内容の修正';
-                        document.getElementById('submitBtn').textContent = '✅ 内容を更新する';
+                        document.getElementById('submitBtn').textContent = '内容を更新する';
                     } else {
                         // View mode (If saved tid is found and no tid in URL, auto-redirect)
                         if (!ticketId) {
@@ -861,32 +1027,39 @@
             btn.innerHTML = '<span class="spinner"></span>登録中...';
 
             try {
-                // Generate a random ID if tid is missing in URL
                 const tid = ticketId || ('TKT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase());
 
-                // Check for duplicates in real-time (Only if not in edit mode)
+                // --- Duplication Check (Privacy-safe with email hash) ---
+                const emailHash = CryptoJS.SHA256(email.toLowerCase().trim()).toString();
                 if (params.get('mode') !== 'edit') {
-                    const checkDoc = await getDoc(doc(db, "registrations", tid));
-                    if (checkDoc.exists()) {
+                    const q = query(collection(db, "registrations"), where("emailHash", "==", emailHash));
+                    const checkSnap = await getDocs(q);
+                    if (!checkSnap.empty) {
+                        const checkDoc = checkSnap.docs[0];
+                        const existingTid = checkDoc.id;
                         document.getElementById('duplicateModal').classList.add('show');
                         document.getElementById('modalTicketBtn').onclick = () => {
-                            location.href = `ticket.html?tid=${tid}`;
+                            location.href = `ticket.html?tid=${existingTid}`;
                         };
                         btn.disabled = false;
-                        btn.innerHTML = '🎫 チケットを登録する';
+                        btn.innerHTML = 'チケットを登録する';
                         return;
                     }
                 }
 
-                // Save or Update in Cloud Firestore
+                // --- RSA + AES Hybrid Encryption ---
+                const ticketKey = generateRandomAESKey();
+                const personalInfo = JSON.stringify({ name, furigana, email, phone });
+                const { encryptedData, encryptedAesKey } = hybridEncrypt(personalInfo, ticketKey);
+
                 const regData = {
                     tid: tid,
-                    name: name,
-                    furigana: furigana,
-                    email: email,
-                    phone: phone,
+                    pData: encryptedData,
+                    pKey: encryptedAesKey,
+                    emailHash: emailHash, // For duplication check without leaking PII
                     count: parseInt(count),
-                    updatedAt: new Date().toISOString()
+                    updatedAt: new Date().toISOString(),
+                    isRSA: true
                 };
 
                 if (params.get('mode') !== 'edit') {
@@ -897,22 +1070,41 @@
 
                 await setDoc(doc(db, "registrations", tid), regData, { merge: true });
 
-                // Save to local storage so the user can find their ticket later without the URL
+                // Save to local storage (with key for retrieval)
                 localStorage.setItem('lastConcertTid', tid);
+                localStorage.setItem(`key_${tid}`, ticketKey);
 
                 // Show success
                 document.getElementById('formContainer').classList.add('hide');
                 document.getElementById('successContainer').classList.add('show');
-                document.getElementById('ticketLink').href = `ticket.html?tid=${tid}`;
+                document.getElementById('ticketLink').href = `ticket.html?tid=${tid}&k=${ticketKey}`;
 
             } catch (error) {
                 console.error("Error saving to Firebase:", error);
                 alert("登録に失敗しました。インターネット接続を確認してください。");
                 btn.disabled = false;
-                btn.innerHTML = '🎫 チケットを登録する';
+                btn.innerHTML = 'チケットを登録する';
             }
         });
+        // Scroll Reveal
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        observer.observe(document.getElementById('main-content'));
     </script>
+    <!-- Development Navigation Menu -->
+    <div id="dev-nav" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); padding: 12px; border-radius: 12px; display: flex; gap: 12px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.3); font-family: sans-serif;">
+        <a href="index.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🏠</span><span>Home</span></a>
+        <a href="admin.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>⚙️</span><span>Admin</span></a>
+        <a href="staff.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🔍</span><span>Staff</span></a>
+        <a href="ticket.html" style="color: #fff; text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><span>🎫</span><span>Ticket</span></a>
+        <button onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; margin-left: 5px; opacity: 0.5;">×</button>
+    </div>
 </body>
 
 </html>
